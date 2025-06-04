@@ -6,7 +6,7 @@ from torchvision.models import efficientnet_v2_s
 from PIL import Image
 
 # Ruta al modelo
-MODEL_PATH = r"C:\Maestria\Clasificador_Tesis\best_efficientnetv2_s.pth"
+MODEL_PATH = "./best_efficientnetv2_s.pth"
 CLASSES = ["Categoria_1", "Categoria_2", "Categoria_3", "Categoria_4", "Categoria_5"] 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
