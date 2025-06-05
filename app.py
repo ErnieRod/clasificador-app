@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 import torch
 import torch.nn as nn
 from torchvision import transforms as T
@@ -11,11 +11,11 @@ CLASSES = ["Categoria_1", "Categoria_2", "Categoria_3", "Categoria_4", "Categori
 
 # Comentarios asociados a cada clase
 COMMENTS = {
-    "Categoria_1": "Puede seguir operando el componente, no presenta ninguna falla estructural.",
-    "Categoria_2": "Puede seguir operando el componente, sin embargo no descuide el análisis de aceites.",
-    "Categoria_3": "Contacte a personal de Confiabilidad, el componente presenta indicios de falla.",
-    "Categoria_4": "El componente debe removerse antes de que llegue a la falla catastrófica.",
-    "Categoria_5": "El componente tiene falla catastrófica. Remover con URGENCIA."
+    "Categoria_1": "✅ Puede seguir operando el componente, no presenta ninguna falla estructural.",
+    "Categoria_2": "ℹ️ Puede seguir operando el componente, sin embargo no descuide el análisis de aceites.",
+    "Categoria_3": "⚠️ Contacte a personal de Confiabilidad, el componente presenta indicios de falla.",
+    "Categoria_4": "⚠️ El componente debe removerse antes de que llegue a la falla catastrófica.",
+    "Categoria_5": "🛑 El componente tiene falla catastrófica. Remover con URGENCIA."
 }
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -43,15 +43,21 @@ uploaded_file = st.file_uploader("Carga una imagen", type=["jpg", "png", "jpeg"]
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Imagen cargada", use_column_width=True)
+    st.image(image, caption="🖼️ Imagen cargada", use_column_width=True)
 
     img_tensor = transform(image).unsqueeze(0).to(DEVICE)
 
     with torch.no_grad():
         outputs = model(img_tensor)
-        pred_class_idx = torch.argmax(outputs, dim=1).item()
-        pred_class = CLASSES[pred_class_idx]
+        probs = torch.softmax(outputs, dim=1).cpu().numpy()[0]
 
-    # Mostrar resultado único con comentario asociado
-    st.write(f"### Categoría asignada: **{pred_class}**")
-    st.info(COMMENTS[pred_class])
+    pred_idx = probs.argmax()
+    pred_score = probs[pred_idx]
+    pred_class = CLASSES[pred_idx]
+
+    if pred_score < 0.50:
+        st.error("⚠️ La imagen cargada no puede ser clasificada. No corresponde a un tapón magnético o presenta características inusuales.")
+    else:
+        st.success(f"🔎 **Categoría Predicha:** {pred_class}")
+        st.info(COMMENTS[pred_class])
+
