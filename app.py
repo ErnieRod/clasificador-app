@@ -55,7 +55,7 @@ if uploaded_file is not None:
     pred_score = probs[pred_idx]
     pred_class = CLASSES[pred_idx]
 
-    if pred_score < 0.50:
+    if pred_score < 0.85:
         st.error("⚠️ La imagen cargada no puede ser clasificada. No corresponde a un tapón magnético o presenta características inusuales.")
     else:
         st.success(f"🔎 **Categoría Predicha:** {pred_class}")
