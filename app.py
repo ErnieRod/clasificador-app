@@ -9,6 +9,15 @@ from PIL import Image
 MODEL_PATH = "./best_efficientnetv2_s.pth"
 CLASSES = ["Categoria_1", "Categoria_2", "Categoria_3", "Categoria_4", "Categoria_5"] 
 
+# Comentarios asociados a cada clase
+COMMENTS = {
+    "Categoria_1": "Puede seguir operando el componente, no presenta ninguna falla estructural.",
+    "Categoria_2": "Puede seguir operando el componente, sin embargo no descuide el análisis de aceites.",
+    "Categoria_3": "Contacte a personal de Confiabilidad, el componente presenta indicios de falla.",
+    "Categoria_4": "El componente debe removerse antes de que llegue a la falla catastrófica.",
+    "Categoria_5": "El componente tiene falla catastrófica. Remover con URGENCIA."
+}
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def load_model():
@@ -27,7 +36,8 @@ transform = T.Compose([
     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-st.title("Clasificador de Imágenes con EfficientNetV2S")
+# Título personalizado
+st.title("Clasificador de Fallas en Componentes Mecánicos: Mando Finales by ERZ")
 
 uploaded_file = st.file_uploader("Carga una imagen", type=["jpg", "png", "jpeg"])
 
@@ -39,8 +49,9 @@ if uploaded_file is not None:
 
     with torch.no_grad():
         outputs = model(img_tensor)
-        probs = torch.sigmoid(outputs).cpu().numpy()[0]
+        pred_class_idx = torch.argmax(outputs, dim=1).item()
+        pred_class = CLASSES[pred_class_idx]
 
-    st.write("### Resultados de predicción:")
-    for i, p in enumerate(probs):
-        st.write(f"{CLASSES[i]}: {p:.2%}")
+    # Mostrar resultado único con comentario asociado
+    st.write(f"### Categoría asignada: **{pred_class}**")
+    st.info(COMMENTS[pred_class])
